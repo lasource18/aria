@@ -1,4 +1,5 @@
 {
+  "name": "aria",
   "private": true,
   "workspaces": [
     "apps/*",
