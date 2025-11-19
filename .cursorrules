@@ -1,0 +1,8 @@
+# Cursor Repo Rules
+- Use TypeScript strict and ensure no implicit any.
+- Never commit secrets or API keys; load from env.
+- All user-visible strings must be centralized for future i18n.
+- Mobile: Explain permission rationale and guard features behind flags.
+- Architecture: keep screens/components/services separated; use React Query for data.
+- Write/update tests with any feature change; keep >80% changed lines covered.
+- Follow infra/prompts/reviewer_checklist.md before marking tasks done.

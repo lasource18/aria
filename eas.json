@@ -1,0 +1,13 @@
+{
+  "cli": { "appVersionSource": "remote" },
+  "build": {
+    "preview": { "developmentClient": false, "distribution": "internal" },
+    "production": { "developmentClient": false, "autoIncrement": true }
+  },
+  "submit": {
+    "production": {
+      "ios": { "appleId": "your@appleid", "ascAppId": "YOUR_ASC_APP_ID" },
+      "android": { "serviceAccountKeyPath": "./play-service-account.json" }
+    }
+  }
+}

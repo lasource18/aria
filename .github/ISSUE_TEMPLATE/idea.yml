@@ -1,0 +1,16 @@
+name: App Idea
+description: Kick off a new app or feature idea
+labels: [idea, workspace-ready]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: One-liner & users
+  - type: textarea
+    id: scope
+    attributes:
+      label: MVP scope & non-goals
+  - type: textarea
+    id: stories
+    attributes:
+      label: Key user stories & acceptance criteria

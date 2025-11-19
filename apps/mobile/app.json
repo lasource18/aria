@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Agentic Mobile",
+    "slug": "agentic-mobile",
+    "scheme": "agentic",
+    "owner": "YOUR_EXPO_OWNER",
+    "android": { "package": "com.yourco.agentic" },
+    "ios": { "bundleIdentifier": "com.yourco.agentic" }
+  }
+}

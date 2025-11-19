@@ -1,0 +1,11 @@
+node_modules
+.expo
+.expo-shared
+.DS_Store
+build
+*.keystore
+*.jks
+*.p8
+*.p12
+play-service-account.json
+.env

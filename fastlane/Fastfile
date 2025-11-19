@@ -1,0 +1,24 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Beta to TestFlight"
+  lane :beta do
+    build_app(scheme: "Agentic Mobile")
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+
+  desc "Submit to App Store Connect"
+  lane :release do
+    deliver(submit_for_review: true, automatic_release: false)
+  end
+end
+
+platform :android do
+  lane :beta do
+    gradle(task: "bundle", build_type: "Release")
+    upload_to_play_store(track: "internal")
+  end
+  lane :release do
+    upload_to_play_store(track: "production", rollout: 0.1)
+  end
+end

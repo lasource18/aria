@@ -1,0 +1,59 @@
+name: PR Routing (Review → QA)
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, labeled]
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  annotate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add needs-review label on open
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' }}
+        uses: actions-ecosystem/action-add-labels@v1
+        with: { labels: needs-review }
+
+      - name: Post reviewer checklist
+        if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `
+**Reviewer Checklist (summary)**
+- [ ] CI green (lint, typecheck, tests)
+- [ ] Changed lines covered by tests; e2e notes added
+- [ ] No secrets; env only
+- [ ] iOS/Android permissions justified; privacy strings present
+- [ ] Accessibility: labels, dynamic type, contrast
+- [ ] Performance: no blocking network in render; images cached
+
+@your-user-reviewer please review per \`infra/prompts/reviewer_checklist.md\`. When ready, label **qa-ready**.
+`;
+            github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body });
+
+  summon-qa:
+    if: ${{ github.event.action == 'labeled' && github.event.label.name == 'qa-ready' || github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping QA with checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            if (!labels.includes('qa-ready')) {
+              core.info('PR does not have qa-ready label, skipping QA step');
+              return;
+            }
+
+            const body = `
+**QA Checklist**
+- [ ] Install/launch (both platforms)
+- [ ] Critical path for this PR passes
+- [ ] Offline flow verified (if relevant)
+- [ ] No crashes; logs clean
+
+@your-user-qa please test preview builds linked above. If pass, apply **release-candidate**; if fail, apply **qa-failed** and file \`bug\` issues.
+`;
+            github.rest.issues.createComment({ ...context.repo, issue_number: context.payload.pull_request.number, body });

@@ -1,0 +1,48 @@
+name: Issue Triage (Route to Agents)
+on:
+  issues:
+    types: [opened, edited, labeled]
+permissions:
+  issues: write
+
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine route
+        id: route
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const labels = issue.labels.map(l => l.name.toLowerCase());
+
+            const isIdea = labels.includes('idea') || /app idea/i.test(issue.title + ' ' + issue.body);
+            const hasArch = labels.includes('arch');
+            const isWorkspaceReady = labels.includes('workspace-ready');
+
+            async function comment(body){
+              await github.rest.issues.createComment({ ...context.repo, issue_number: issue.number, body });
+            }
+            async function addLabels(newLabels){
+              await github.rest.issues.addLabels({ ...context.repo, issue_number: issue.number, labels: newLabels });
+            }
+
+            // Auto-detect platform
+            const text = (issue.title + ' ' + issue.body).toLowerCase();
+            if (/web|next|cloudflare/.test(text)) await addLabels(['web']);
+            if (/mobile|expo|ios|android/.test(text)) await addLabels(['mobile']);
+
+            if (isIdea) {
+              await comment(`Summoning **Planner**: @your-user-planner`);
+              await addLabels(['mvp']);
+              return;
+            }
+            if (hasArch) {
+              await comment(`Summoning **Architect**: @your-user-architect`);
+              return;
+            }
+            if (isWorkspaceReady) {
+              await comment(`Summoning **Implementer**: @your-user-implementer`);
+              return;
+            }

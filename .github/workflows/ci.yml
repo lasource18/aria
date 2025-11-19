@@ -1,0 +1,60 @@
+name: CI
+on:
+  pull_request:
+    paths-ignore: ["**/*.md"]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile --cwd apps/mobile
+      - name: Lint
+        working-directory: apps/mobile
+        run: bun run lint
+      - name: Typecheck
+        working-directory: apps/mobile
+        run: bun run typecheck
+      - name: Test
+        working-directory: apps/mobile
+        run: bun test
+      - name: Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+      - name: Generate SBOM
+        run: |
+          cd apps/mobile
+          # Generate SBOM using CycloneDX npm package
+          bunx -y @cyclonedx/cyclonedx-npm@latest --output-file bom.json || echo "Note: SBOM generation is optional and may require additional setup"
+      - name: Validate author email ↔ branch role
+        continue-on-error: true
+        run: |
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          AUTHOR_EMAIL="$(git log -1 --pretty=format:'%ae')"
+
+          # Skip validation for GitHub Actions bot emails
+          if [[ "$AUTHOR_EMAIL" == *"@users.noreply.github.com" ]] || [[ "$AUTHOR_EMAIL" == *"actions@"* ]]; then
+            echo "⚠️  Skipping email validation for GitHub Actions bot: $AUTHOR_EMAIL"
+            exit 0
+          fi
+
+          case "$BRANCH" in
+            feature/planner/*)      want="claudemicaelg+planner@gmail.com" ;;
+            feature/architect/*)    want="claudemicaelg+architect@gmail.com" ;;
+            feature/implementer/*)  want="claudemicaelg+implementer@gmail.com" ;;
+            feature/reviewer/*)     want="claudemicaelg+reviewer@gmail.com" ;;
+            feature/qa/*)           want="claudemicaelg+qa@gmail.com" ;;
+            *)                      want="" ;;
+          esac
+
+          if [ -n "$want" ] && [ "$AUTHOR_EMAIL" != "$want" ]; then
+            echo "⚠️  Warning: Expected author '$want' for branch '$BRANCH', got '$AUTHOR_EMAIL'"
+            echo "   This is a warning only. Configure git email with: git config user.email '$want'"
+            exit 0
+          fi
+
+          if [ -n "$want" ]; then
+            echo "✅ Author email matches branch pattern: $AUTHOR_EMAIL"
+          fi

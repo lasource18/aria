@@ -1,0 +1,4 @@
+min_sdk: 24
+forbid_permissions:
+  - android.permission.READ_SMS
+  - android.permission.CALL_PHONE

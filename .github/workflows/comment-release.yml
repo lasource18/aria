@@ -1,0 +1,22 @@
+name: Comment → Release Tag
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  tag:
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/release ') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make tag
+        run: |
+          VERSION="${{ github.event.comment.body }}"        # e.g. "/release v0.1.0"
+          VERSION="${VERSION#* }"
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "$VERSION"

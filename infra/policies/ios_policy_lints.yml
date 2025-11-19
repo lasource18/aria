@@ -1,0 +1,5 @@
+required_info_plist_keys:
+  - NSCameraUsageDescription
+  - NSPhotoLibraryUsageDescription
+att_usage:
+  required_if_tracking: true
