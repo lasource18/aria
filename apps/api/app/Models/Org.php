@@ -83,18 +83,21 @@ class Org extends Model
     /**
      * Check if user is a member of this organization.
      */
-    public function hasMember(User $user): bool
+    public function hasMember(User|string $user): bool
     {
-        return $this->members()->where('user_id', $user->id)->exists();
+        $userId = $user instanceof User ? $user->id : $user;
+        return $this->members()->where('user_id', $userId)->exists();
     }
 
     /**
      * Check if user has specific role(s) in this organization.
      */
-    public function hasMemberWithRole(User $user, array $roles): bool
+    public function hasMemberWithRole(User|string $user, string|array $roles): bool
     {
+        $userId = $user instanceof User ? $user->id : $user;
+        $roles = is_array($roles) ? $roles : [$roles];
         return $this->members()
-            ->where('user_id', $user->id)
+            ->where('user_id', $userId)
             ->whereIn('role', $roles)
             ->exists();
     }

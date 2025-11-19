@@ -129,9 +129,9 @@ class OrgController extends Controller
         // Check if user is already a member
         if ($org->hasMember($user)) {
             return response()->json([
-                'error' => [
-                    'code' => 'ALREADY_MEMBER',
-                    'message' => 'User is already a member of this organization',
+                'message' => 'User is already a member of this organization',
+                'errors' => [
+                    'user_id' => ['User is already a member of this organization'],
                 ],
             ], 422);
         }
@@ -157,7 +157,7 @@ class OrgController extends Controller
             return response()->json([
                 'error' => [
                     'code' => 'LAST_OWNER',
-                    'message' => 'Cannot remove the last owner of the organization',
+                    'message' => 'Cannot remove the last owner from the organization.',
                 ],
             ], 422);
         }
