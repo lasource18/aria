@@ -282,19 +282,19 @@ class AuthController extends Controller
         );
 
         // TODO: Send email with reset link (deferred to email infrastructure issue #6)
-        // For now, log the token for testing (LOCAL ENVIRONMENT ONLY - security sensitive)
-        if (app()->environment('local')) {
-            \Log::info('Password reset token generated', [
-                'email' => $user->email,
-                'token' => $token,
-                'reset_url' => config('app.frontend_url').'/reset-password?token='.$token,
-            ]);
+
+        $responseData = [
+            'message' => 'If the email or phone exists in our system, you will receive password reset instructions.',
+        ];
+
+        // Only expose token in automated testing environment for test assertions
+        // NEVER log or expose tokens in local/staging/production environments
+        if (app()->environment('testing')) {
+            $responseData['debug_token'] = $token;
         }
 
         return response()->json([
-            'data' => [
-                'message' => 'If the email or phone exists in our system, you will receive password reset instructions.',
-            ],
+            'data' => $responseData,
         ]);
     }
 

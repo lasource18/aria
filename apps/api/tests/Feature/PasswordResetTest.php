@@ -245,4 +245,37 @@ class PasswordResetTest extends TestCase
 
         $this->assertCount(1, $tokens);
     }
+
+    public function test_debug_token_returned_in_testing_environment(): void
+    {
+        $user = User::factory()->create(['email' => 'test@example.com']);
+
+        $response = $this->postJson('/api/v1/auth/password/reset-request', [
+            'email_or_phone' => 'test@example.com',
+        ]);
+
+        $response->assertStatus(200);
+
+        // In testing environment, debug_token should be present for test assertions
+        $response->assertJsonStructure([
+            'data' => [
+                'message',
+                'debug_token',
+            ],
+        ]);
+
+        // Verify we can use the returned token to reset password
+        $token = $response->json('data.debug_token');
+        $this->assertNotNull($token);
+
+        $resetResponse = $this->postJson('/api/v1/auth/password/reset', [
+            'token' => $token,
+            'password' => 'NewPassword123',
+            'password_confirmation' => 'NewPassword123',
+        ]);
+
+        $resetResponse->assertStatus(200);
+        $user->refresh();
+        $this->assertTrue(Hash::check('NewPassword123', $user->password));
+    }
 }
