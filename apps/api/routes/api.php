@@ -11,15 +11,17 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// V1 API Routes
-Route::prefix('v1')->group(function () {
-    // Public Auth Routes
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/login', [AuthController::class, 'login']);
+// V1 API Routes with global rate limiting
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
+    // Public Auth Routes with specific rate limits
+    Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:register');
+    Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:login');
+    Route::post('/auth/password/reset-request', [AuthController::class, 'resetRequest'])->middleware('throttle:password-reset');
+    Route::post('/auth/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset');
 
     // Protected Auth Routes
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+        Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware('throttle:token-refresh');
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 
         // Organization Routes

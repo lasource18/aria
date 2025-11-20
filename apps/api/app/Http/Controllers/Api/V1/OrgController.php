@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Org;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -54,6 +55,18 @@ class OrgController extends Controller
         // Auto-assign creator as owner
         $org->addMember($request->user(), 'owner');
 
+        // Audit log: organization created (Issue #12)
+        AuditLog::log(
+            action: 'org.created',
+            entityType: 'Org',
+            entityId: $org->id,
+            metadata: ['name' => $org->name, 'country_code' => $org->country_code],
+            userId: $request->user()->id,
+            orgId: $org->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
+
         return response()->json([
             'data' => $org->load('members'),
         ], 201);
@@ -95,7 +108,30 @@ class OrgController extends Controller
             ], 422);
         }
 
+        // Track changes for audit log
+        $changes = [];
+        $original = $org->getOriginal();
+        foreach (['name', 'country_code', 'payout_channel', 'payout_identifier'] as $field) {
+            if ($request->has($field) && $request->$field !== $original[$field]) {
+                $changes[$field] = ['from' => $original[$field], 'to' => $request->$field];
+            }
+        }
+
         $org->update($request->only(['name', 'country_code', 'payout_channel', 'payout_identifier']));
+
+        // Audit log: organization updated (Issue #12)
+        if (!empty($changes)) {
+            AuditLog::log(
+                action: 'org.updated',
+                entityType: 'Org',
+                entityId: $org->id,
+                changes: $changes,
+                userId: $request->user()->id,
+                orgId: $org->id,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
+        }
 
         return response()->json([
             'data' => $org,
@@ -138,6 +174,18 @@ class OrgController extends Controller
 
         $member = $org->addMember($user, $request->role);
 
+        // Audit log: member added (Issue #12)
+        AuditLog::log(
+            action: 'org.member_added',
+            entityType: 'OrgMember',
+            entityId: $member->id,
+            metadata: ['added_user_id' => $user->id, 'role' => $request->role],
+            userId: $request->user()->id,
+            orgId: $org->id,
+            ipAddress: $request->ip(),
+            userAgent: $request->userAgent()
+        );
+
         return response()->json([
             'data' => $member->load('user'),
         ], 201);
@@ -162,7 +210,25 @@ class OrgController extends Controller
             ], 422);
         }
 
+        // Get member before removal for audit log
+        $member = $org->members()->where('user_id', $user->id)->first();
+        $previousRole = $member?->role;
+
         $org->removeMember($user);
+
+        // Audit log: member removed (Issue #12)
+        if ($member) {
+            AuditLog::log(
+                action: 'org.member_removed',
+                entityType: 'OrgMember',
+                entityId: $member->id,
+                metadata: ['removed_user_id' => $user->id, 'previous_role' => $previousRole],
+                userId: $request->user()->id,
+                orgId: $org->id,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
+        }
 
         return response()->json([
             'data' => [
@@ -194,7 +260,26 @@ class OrgController extends Controller
 
         $user = User::findOrFail($userId);
 
+        // Get member before update for audit log
+        $member = $org->members()->where('user_id', $user->id)->first();
+        $oldRole = $member?->role;
+
         $org->updateMemberRole($user, $request->role);
+
+        // Audit log: member role updated (Issue #12)
+        if ($member && $oldRole !== $request->role) {
+            AuditLog::log(
+                action: 'org.member_role_updated',
+                entityType: 'OrgMember',
+                entityId: $member->id,
+                changes: ['role' => ['from' => $oldRole, 'to' => $request->role]],
+                metadata: ['target_user_id' => $user->id],
+                userId: $request->user()->id,
+                orgId: $org->id,
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
+        }
 
         return response()->json([
             'data' => [
