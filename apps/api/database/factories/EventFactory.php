@@ -42,7 +42,7 @@ class EventFactory extends Factory
 
         $categories = ['music', 'arts', 'sports', 'tech', 'other'];
         $startAt = fake()->dateTimeBetween('+1 week', '+3 months');
-        $endAt = fake()->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s') . ' +8 hours');
+        $endAt = fake()->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s').' +8 hours');
         $venue = fake()->randomElement($venues);
         $isOnline = fake()->boolean(20); // 20% chance online
 
@@ -50,7 +50,7 @@ class EventFactory extends Factory
             'org_id' => Org::factory(),
             'title' => fake()->randomElement($eventTitles),
             // Slug auto-generated
-            'description_md' => fake()->paragraphs(3, true) . "\n\n## Programme\n\n" . fake()->paragraph(),
+            'description_md' => fake()->paragraphs(3, true)."\n\n## Programme\n\n".fake()->paragraph(),
             'category' => fake()->randomElement($categories),
             'venue_name' => $isOnline ? null : $venue['name'],
             'venue_address' => $isOnline ? null : $venue['address'],

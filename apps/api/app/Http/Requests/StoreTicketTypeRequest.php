@@ -21,10 +21,9 @@ class StoreTicketTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:100'],
             'type' => ['required', 'in:free,paid,donation'],
-            'price_xof' => ['required_if:type,paid', 'numeric', 'min:0', 'max:10000000'],
             'fee_pass_through_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'max_qty' => ['nullable', 'integer', 'min:1', 'max:100000'],
             'per_order_limit' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -32,6 +31,15 @@ class StoreTicketTypeRequest extends FormRequest
             'sales_end' => ['nullable', 'date', 'after:sales_start'],
             'refundable' => ['nullable', 'boolean'],
         ];
+
+        // Price validation based on ticket type
+        if ($this->type === 'paid') {
+            $rules['price_xof'] = ['required', 'numeric', 'min:1', 'max:10000000'];
+        } else {
+            $rules['price_xof'] = ['nullable', 'numeric', 'min:0', 'max:10000000'];
+        }
+
+        return $rules;
     }
 
     /**

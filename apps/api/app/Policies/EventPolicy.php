@@ -29,7 +29,7 @@ class EventPolicy
         }
 
         // Draft events only visible to org members
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class EventPolicy
     public function update(User $user, Event $event): bool
     {
         // Cannot update canceled or ended events
-        if (!$event->canBeUpdated()) {
+        if (! $event->canBeUpdated()) {
             return false;
         }
 
@@ -65,7 +65,7 @@ class EventPolicy
      */
     public function delete(User $user, Event $event): bool
     {
-        if (!$event->canBeDeleted()) {
+        if (! $event->canBeDeleted()) {
             return false;
         }
 
@@ -91,7 +91,7 @@ class EventPolicy
      */
     public function cancel(User $user, Event $event): bool
     {
-        if (!$event->canBeCanceled()) {
+        if (! $event->canBeCanceled()) {
             return false;
         }
 

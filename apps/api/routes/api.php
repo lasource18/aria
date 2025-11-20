@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\OrgController;
 use App\Http\Controllers\Api\V1\TicketTypeController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*

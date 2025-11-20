@@ -16,7 +16,7 @@ return new class extends Migration
             DB::unprepared('CREATE EXTENSION IF NOT EXISTS postgis;');
             Log::info('PostGIS extension enabled successfully');
         } catch (\Exception $e) {
-            Log::warning('PostGIS extension not available: ' . $e->getMessage());
+            Log::warning('PostGIS extension not available: '.$e->getMessage());
             // Continue - will use fallback approach for location storage
         }
 
@@ -25,7 +25,7 @@ return new class extends Migration
             DB::unprepared('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
             Log::info('pg_trgm extension enabled successfully');
         } catch (\Exception $e) {
-            Log::warning('pg_trgm extension not available: ' . $e->getMessage());
+            Log::warning('pg_trgm extension not available: '.$e->getMessage());
             // Continue - full-text search will be limited
         }
     }

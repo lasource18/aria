@@ -156,7 +156,7 @@ class TicketType extends Model
      */
     public function hasSalesStarted(): bool
     {
-        if (!$this->sales_start) {
+        if (! $this->sales_start) {
             return true; // No start time means available immediately
         }
 
@@ -169,6 +169,7 @@ class TicketType extends Model
     public function archive(): bool
     {
         $this->archived_at = now();
+
         return $this->save();
     }
 
@@ -178,6 +179,7 @@ class TicketType extends Model
     public function unarchive(): bool
     {
         $this->archived_at = null;
+
         return $this->save();
     }
 }

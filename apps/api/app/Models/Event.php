@@ -50,6 +50,7 @@ class Event extends Model
             'end_at' => 'datetime',
             'is_online' => 'boolean',
             'settings' => 'array',
+            'status' => 'string',
         ];
     }
 
@@ -78,7 +79,7 @@ class Event extends Model
 
         // Add 4-char random suffix if duplicate
         while (static::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . Str::lower(Str::random(4));
+            $slug = $baseSlug.'-'.Str::lower(Str::random(4));
         }
 
         return $slug;
@@ -133,6 +134,7 @@ class Event extends Model
                     'SELECT ST_Y(location::geometry) as lat, ST_X(location::geometry) as lng FROM events WHERE id = ?',
                     [$this->id]
                 );
+
                 return $result ? ['lat' => (float) $result->lat, 'lng' => (float) $result->lng] : null;
             } catch (\Exception $e) {
                 // Fall through to fallback
@@ -190,7 +192,7 @@ class Event extends Model
      */
     public function canBeUpdated(): bool
     {
-        return !in_array($this->status, ['canceled', 'ended']);
+        return ! in_array($this->status, ['canceled', 'ended']);
     }
 
     /**
@@ -207,11 +209,12 @@ class Event extends Model
      */
     public function publish(): bool
     {
-        if ($this->status !== 'draft' || !$this->canBePublished()) {
+        if ($this->status !== 'draft' || ! $this->canBePublished()) {
             return false;
         }
 
         $this->status = 'published';
+
         return $this->save();
     }
 
@@ -220,11 +223,12 @@ class Event extends Model
      */
     public function cancel(): bool
     {
-        if (!$this->canBeCanceled()) {
+        if (! $this->canBeCanceled()) {
             return false;
         }
 
         $this->status = 'canceled';
+
         return $this->save();
     }
 

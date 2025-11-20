@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
+use App\Models\AuditLog;
 use App\Models\Event;
 use App\Models\Org;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class EventController extends Controller
+class EventController extends BaseController
 {
     /**
      * Display a listing of published events (public discovery).
@@ -25,7 +25,7 @@ class EventController extends Controller
         // Full-text search using pg_trgm
         if ($q = $request->input('q')) {
             $query->whereRaw('similarity(title, ?) > 0.3', [$q])
-                  ->orderByRaw('similarity(title, ?) DESC', [$q]);
+                ->orderByRaw('similarity(title, ?) DESC', [$q]);
         }
 
         // Category filter
@@ -59,7 +59,7 @@ class EventController extends Controller
                 $lngDelta = $radiusKm / (111 * cos(deg2rad($lat)));
 
                 $query->whereBetween('latitude', [$lat - $latDelta, $lat + $latDelta])
-                      ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta]);
+                    ->whereBetween('longitude', [$lng - $lngDelta, $lng + $lngDelta]);
             }
         }
 
@@ -77,24 +77,16 @@ class EventController extends Controller
         }
 
         // Default sort: upcoming events first (if not searching)
-        if (!$request->has('q')) {
+        if (! $request->has('q')) {
             $query->orderBy('start_at', 'asc');
         }
 
         $events = $query->with(['ticketTypes' => function ($q) {
             $q->whereNull('archived_at');
         }, 'org:id,name,slug'])
-        ->paginate(20);
+            ->paginate(20);
 
-        return response()->json([
-            'data' => $events->items(),
-            'meta' => [
-                'current_page' => $events->currentPage(),
-                'last_page' => $events->lastPage(),
-                'per_page' => $events->perPage(),
-                'total' => $events->total(),
-            ],
-        ]);
+        return $this->paginatedResponse($events);
     }
 
     /**
@@ -105,11 +97,12 @@ class EventController extends Controller
         Gate::authorize('create', [Event::class, $org]);
 
         $event = $org->events()->create($request->validated());
+        $event->refresh(); // Refresh to get database defaults like status
 
-        return response()->json([
-            'data' => $event->load('ticketTypes', 'org:id,name,slug'),
-            'message' => 'Event created successfully',
-        ], 201);
+        return $this->successResponse(
+            $event->load('ticketTypes', 'org:id,name,slug'),
+            ['message' => 'Event created successfully']
+        )->setStatusCode(201);
     }
 
     /**
@@ -123,9 +116,7 @@ class EventController extends Controller
             $q->whereNull('archived_at');
         }, 'org:id,name,slug']);
 
-        return response()->json([
-            'data' => $event,
-        ]);
+        return $this->successResponse($event);
     }
 
     /**
@@ -137,10 +128,10 @@ class EventController extends Controller
 
         $event->update($request->validated());
 
-        return response()->json([
-            'data' => $event->load('ticketTypes', 'org:id,name,slug'),
-            'message' => 'Event updated successfully',
-        ]);
+        return $this->successResponse(
+            $event->load('ticketTypes', 'org:id,name,slug'),
+            ['message' => 'Event updated successfully']
+        );
     }
 
     /**
@@ -150,11 +141,25 @@ class EventController extends Controller
     {
         Gate::authorize('delete', $event);
 
+        // Log before deletion
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'org_id' => $event->org_id,
+            'action' => 'event.deleted',
+            'entity_type' => 'event',
+            'entity_id' => $event->id,
+            'changes' => null,
+            'metadata' => ['event_title' => $event->title, 'event_status' => $event->status],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
+
         $event->delete();
 
-        return response()->json([
-            'message' => 'Event deleted successfully',
-        ]);
+        return $this->successResponse(
+            null,
+            ['message' => 'Event deleted successfully']
+        );
     }
 
     /**
@@ -165,18 +170,33 @@ class EventController extends Controller
     {
         Gate::authorize('publish', $event);
 
-        if (!$event->canBePublished()) {
-            return response()->json([
-                'message' => 'Cannot publish event without at least one ticket type',
-            ], 422);
+        if (! $event->canBePublished()) {
+            return $this->errorResponse(
+                'PUBLISH_REQUIRES_TICKETS',
+                'Cannot publish event without at least one ticket type',
+                null,
+                422
+            );
         }
 
         $event->publish();
 
-        return response()->json([
-            'data' => $event->load('ticketTypes', 'org:id,name,slug'),
-            'message' => 'Event published successfully',
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'org_id' => $event->org_id,
+            'action' => 'event.published',
+            'entity_type' => 'event',
+            'entity_id' => $event->id,
+            'changes' => ['old_status' => 'draft', 'new_status' => 'published'],
+            'metadata' => ['event_title' => $event->title],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
+
+        return $this->successResponse(
+            $event->load('ticketTypes', 'org:id,name,slug'),
+            ['message' => 'Event published successfully']
+        );
     }
 
     /**
@@ -189,9 +209,21 @@ class EventController extends Controller
 
         $event->cancel();
 
-        return response()->json([
-            'data' => $event->load('ticketTypes', 'org:id,name,slug'),
-            'message' => 'Event canceled successfully',
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'org_id' => $event->org_id,
+            'action' => 'event.canceled',
+            'entity_type' => 'event',
+            'entity_id' => $event->id,
+            'changes' => ['old_status' => 'published', 'new_status' => 'canceled'],
+            'metadata' => ['event_title' => $event->title],
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
         ]);
+
+        return $this->successResponse(
+            $event->load('ticketTypes', 'org:id,name,slug'),
+            ['message' => 'Event canceled successfully']
+        );
     }
 }
