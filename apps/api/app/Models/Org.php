@@ -81,6 +81,14 @@ class Org extends Model
     }
 
     /**
+     * Get the events for this organization.
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
      * Check if user is a member of this organization.
      */
     public function hasMember(User|string $user): bool

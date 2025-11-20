@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\OrgController;
+use App\Http\Controllers\Api\V1\TicketTypeController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +21,10 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::post('/auth/password/reset-request', [AuthController::class, 'resetRequest'])->middleware('throttle:password-reset');
     Route::post('/auth/password/reset', [AuthController::class, 'resetPassword'])->middleware('throttle:password-reset');
 
+    // Public Event Discovery
+    Route::get('/events', [EventController::class, 'index']);
+    Route::get('/events/{event:slug}', [EventController::class, 'show']);
+
     // Protected Auth Routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware('throttle:token-refresh');
@@ -33,5 +40,18 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
         Route::post('/orgs/{org}/members', [OrgController::class, 'addMember']);
         Route::delete('/orgs/{org}/members/{userId}', [OrgController::class, 'removeMember']);
         Route::patch('/orgs/{org}/members/{userId}', [OrgController::class, 'updateMemberRole']);
+
+        // Event Management (Organizer)
+        Route::post('/orgs/{org}/events', [EventController::class, 'store']);
+        Route::patch('/events/{event}', [EventController::class, 'update']);
+        Route::delete('/events/{event}', [EventController::class, 'destroy']);
+        Route::post('/events/{event}/publish', [EventController::class, 'publish']);
+        Route::post('/events/{event}/cancel', [EventController::class, 'cancel']);
+
+        // Ticket Type Management
+        Route::get('/events/{event}/ticket-types', [TicketTypeController::class, 'index']);
+        Route::post('/events/{event}/ticket-types', [TicketTypeController::class, 'store']);
+        Route::patch('/events/{event}/ticket-types/{ticketType}', [TicketTypeController::class, 'update']);
+        Route::delete('/events/{event}/ticket-types/{ticketType}', [TicketTypeController::class, 'destroy']);
     });
 });
