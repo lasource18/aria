@@ -87,7 +87,7 @@ class AuditLogTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/auth/logout');
 
         $response->assertStatus(200);
@@ -105,7 +105,7 @@ class AuditLogTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson('/api/v1/orgs', [
                 'name' => 'Test Organization',
                 'country_code' => 'CI',
@@ -131,7 +131,7 @@ class AuditLogTest extends TestCase
         $org->addMember($user, 'owner');
         $token = $user->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->patchJson("/api/v1/orgs/{$org->id}", [
                 'name' => 'Updated Organization Name',
             ]);
@@ -158,7 +158,7 @@ class AuditLogTest extends TestCase
         $org->addMember($owner, 'owner');
         $token = $owner->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson("/api/v1/orgs/{$org->id}/members", [
                 'user_id' => $newMember->id,
                 'role' => 'admin',
@@ -186,7 +186,7 @@ class AuditLogTest extends TestCase
         $org->addMember($member, 'staff');
         $token = $owner->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->patchJson("/api/v1/orgs/{$org->id}/members/{$member->id}", [
                 'role' => 'admin',
             ]);
@@ -213,7 +213,7 @@ class AuditLogTest extends TestCase
         $org->addMember($member, 'staff');
         $token = $owner->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->deleteJson("/api/v1/orgs/{$org->id}/members/{$member->id}");
 
         $response->assertStatus(200);
@@ -252,7 +252,7 @@ class AuditLogTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('access-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->withHeader('User-Agent', 'TestBrowser/1.0')
             ->postJson('/api/v1/orgs', [
                 'name' => 'Test Org',

@@ -54,7 +54,7 @@ class OrgFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'payout_channel' => $channel,
-            'payout_identifier' => $identifier ?? '+225' . fake()->numerify('##########'),
+            'payout_identifier' => $identifier ?? '+225'.fake()->numerify('##########'),
         ]);
     }
 

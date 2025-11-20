@@ -36,10 +36,11 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     $retryAfter = $headers['Retry-After'] ?? 900;
+
                     return response()->json([
                         'error' => [
                             'code' => 'RATE_LIMIT_EXCEEDED',
-                            'message' => 'Too many login attempts. Please try again in ' . ceil($retryAfter / 60) . ' minutes.',
+                            'message' => 'Too many login attempts. Please try again in '.ceil($retryAfter / 60).' minutes.',
                             'retry_after_seconds' => $retryAfter,
                         ],
                     ], 429, $headers);
@@ -52,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     $retryAfter = $headers['Retry-After'] ?? 3600;
+
                     return response()->json([
                         'error' => [
                             'code' => 'RATE_LIMIT_EXCEEDED',
@@ -64,11 +66,14 @@ class AppServiceProvider extends ServiceProvider
 
         // Password reset rate limiting: 3 attempts per email/phone per hour
         RateLimiter::for('password-reset', function (Request $request) {
+            // Use email/phone from request, fallback to IP if not provided (handles malformed requests)
             $key = $request->input('email_or_phone', $request->ip());
+
             return Limit::perHour(3)
                 ->by($key)
                 ->response(function (Request $request, array $headers) {
                     $retryAfter = $headers['Retry-After'] ?? 3600;
+
                     return response()->json([
                         'error' => [
                             'code' => 'RATE_LIMIT_EXCEEDED',
@@ -82,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
         // Token refresh rate limiting: 20 attempts per user per hour
         RateLimiter::for('token-refresh', function (Request $request) {
             $userId = $request->user()?->id ?? $request->ip();
+
             return Limit::perHour(20)
                 ->by($userId)
                 ->response(function (Request $request, array $headers) {

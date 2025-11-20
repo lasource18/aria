@@ -105,7 +105,7 @@ class AuthController extends Controller
             $user = User::where('phone', $request->phone)->first();
         }
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             // Audit log: failed login attempt (Issue #12)
             AuditLog::log(
                 action: 'user.login_failed',
@@ -164,7 +164,7 @@ class AuthController extends Controller
     {
         $refreshToken = $request->bearerToken();
 
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             return response()->json([
                 'error' => [
                     'code' => 'MISSING_TOKEN',
@@ -176,7 +176,7 @@ class AuthController extends Controller
         // Validate refresh token
         $user = Auth::guard('sanctum')->user();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'error' => [
                     'code' => 'INVALID_TOKEN',
@@ -248,7 +248,7 @@ class AuthController extends Controller
             ->first();
 
         // Always return 200 to prevent user enumeration
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'data' => [
                     'message' => 'If the email or phone exists in our system, you will receive password reset instructions.',
@@ -282,12 +282,14 @@ class AuthController extends Controller
         );
 
         // TODO: Send email with reset link (deferred to email infrastructure issue #6)
-        // For now, log the token for testing
-        \Log::info('Password reset token generated', [
-            'email' => $user->email,
-            'token' => $token,
-            'reset_url' => config('app.frontend_url') . '/reset-password?token=' . $token,
-        ]);
+        // For now, log the token for testing (LOCAL ENVIRONMENT ONLY - security sensitive)
+        if (app()->environment('local')) {
+            \Log::info('Password reset token generated', [
+                'email' => $user->email,
+                'token' => $token,
+                'reset_url' => config('app.frontend_url').'/reset-password?token='.$token,
+            ]);
+        }
 
         return response()->json([
             'data' => [
@@ -329,7 +331,7 @@ class AuthController extends Controller
             }
         }
 
-        if (!$resetRecord) {
+        if (! $resetRecord) {
             return response()->json([
                 'error' => [
                     'code' => 'INVALID_TOKEN',
@@ -341,7 +343,7 @@ class AuthController extends Controller
         // Find user by email
         $user = User::where('email', $resetRecord->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'error' => [
                     'code' => 'USER_NOT_FOUND',

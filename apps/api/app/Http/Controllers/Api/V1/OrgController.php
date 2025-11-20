@@ -112,7 +112,7 @@ class OrgController extends Controller
         $changes = [];
         $original = $org->getOriginal();
         foreach (['name', 'country_code', 'payout_channel', 'payout_identifier'] as $field) {
-            if ($request->has($field) && $request->$field !== $original[$field]) {
+            if ($request->has($field) && $original[$field] !== $request->$field) {
                 $changes[$field] = ['from' => $original[$field], 'to' => $request->$field];
             }
         }
@@ -120,7 +120,7 @@ class OrgController extends Controller
         $org->update($request->only(['name', 'country_code', 'payout_channel', 'payout_identifier']));
 
         // Audit log: organization updated (Issue #12)
-        if (!empty($changes)) {
+        if (! empty($changes)) {
             AuditLog::log(
                 action: 'org.updated',
                 entityType: 'Org',
