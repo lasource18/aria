@@ -55,7 +55,7 @@ class Org extends Model
                 // Ensure unique slug
                 $count = 1;
                 while (static::where('slug', $org->slug)->exists()) {
-                    $org->slug = Str::slug($org->name) . '-' . $count;
+                    $org->slug = Str::slug($org->name).'-'.$count;
                     $count++;
                 }
             }
@@ -86,6 +86,7 @@ class Org extends Model
     public function hasMember(User|string $user): bool
     {
         $userId = $user instanceof User ? $user->id : $user;
+
         return $this->members()->where('user_id', $userId)->exists();
     }
 
@@ -96,6 +97,7 @@ class Org extends Model
     {
         $userId = $user instanceof User ? $user->id : $user;
         $roles = is_array($roles) ? $roles : [$roles];
+
         return $this->members()
             ->where('user_id', $userId)
             ->whereIn('role', $roles)
