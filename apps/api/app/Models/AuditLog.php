@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class AuditLog extends Model
 {
@@ -69,8 +70,11 @@ class AuditLog extends Model
         ?string $ipAddress = null,
         ?string $userAgent = null
     ): self {
+        /** @var User|null $authUser */
+        $authUser = Auth::user();
+
         return self::create([
-            'user_id' => $userId ?? auth()->id(),
+            'user_id' => $userId ?? $authUser?->id,
             'org_id' => $orgId,
             'action' => $action,
             'entity_type' => $entityType,

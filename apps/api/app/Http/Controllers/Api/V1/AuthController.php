@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -44,7 +45,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => $request->password,
             'full_name' => $request->full_name,
-            'locale' => $request->locale ?? 'fr-FR',
+            'locale' => $request->input('locale', 'fr-FR'),
         ]);
 
         // Audit log: user registration (Issue #12)
@@ -174,6 +175,7 @@ class AuthController extends Controller
         }
 
         // Validate refresh token
+        /** @var User|null $user */
         $user = Auth::guard('sanctum')->user();
 
         if (! $user) {
@@ -375,7 +377,7 @@ class AuthController extends Controller
         );
 
         // TODO: Send confirmation email (deferred to email infrastructure)
-        \Log::info('Password reset successful', [
+        Log::info('Password reset successful', [
             'user_id' => $user->id,
             'email' => $user->email,
             'ip' => $request->ip(),
