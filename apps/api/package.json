@@ -1,10 +1,13 @@
 {
-    "name": "aria-api",
+    "name": "@aria/api",
     "private": true,
     "type": "module",
     "scripts": {
+        "dev": "vite",
         "build": "vite build",
-        "dev": "vite"
+        "test": "php artisan test",
+        "lint": "./vendor/bin/pint --test",
+        "typecheck": "echo 'PHP type checking via phpstan not configured yet'"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",

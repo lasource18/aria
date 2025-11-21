@@ -9,3 +9,11 @@ build
 *.p12
 play-service-account.json
 .env
+
+# Build outputs
+.next
+dist
+out
+
+# Turborepo
+.turbo
