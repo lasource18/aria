@@ -14,13 +14,13 @@ return new class extends Migration
     {
         // Enable UUID extension for PostgreSQL only
         if (DB::getDriverName() === 'pgsql') {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
         }
 
         Schema::create('users', function (Blueprint $table) {
             // Use database-specific UUID defaults
             if (DB::getDriverName() === 'pgsql') {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+                $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
             } else {
                 // SQLite and other databases: use string UUIDs without default
                 $table->uuid('id')->primary();

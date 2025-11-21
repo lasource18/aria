@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('orgs', function (Blueprint $table) {
             if (DB::getDriverName() === 'pgsql') {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+                $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
             } else {
                 $table->uuid('id')->primary();
             }
