@@ -7,7 +7,11 @@ export default {
         './storage/framework/views/*.php',
         './resources/**/*.blade.php',
         './resources/**/*.js',
+        './resources/**/*.ts',
+        './resources/**/*.jsx',
+        './resources/**/*.tsx',
         './resources/**/*.vue',
+        '../../packages/ui/**/*.{ts,tsx}',
     ],
     theme: {
         extend: {

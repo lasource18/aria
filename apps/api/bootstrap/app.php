@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +14,31 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
+        $middleware->alias([
+            'org.member' => \App\Http\Middleware\EnsureUserIsOrgMember::class,
+        ]);
+        // Don't redirect API routes to login - let exception handler return JSON
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                throw new AuthenticationException('Unauthenticated.');
+            }
+
+            return '/login';
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Return JSON responses for authentication errors on API routes
+        $exceptions->render(function (AuthenticationException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'error' => [
+                        'code' => 'UNAUTHENTICATED',
+                        'message' => 'Unauthenticated.',
+                    ],
+                ], 401);
+            }
+        });
     })->create();
