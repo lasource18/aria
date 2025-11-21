@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson() || $request->is('api/*')) {
                 throw new AuthenticationException('Unauthenticated.');
             }
+
             return '/login';
         });
     })
