@@ -2,6 +2,7 @@ import type { User } from './User';
 import type { Event } from './Event';
 import type { Payment } from './Payment';
 import type { Ticket } from './Ticket';
+import type { OrderState } from '../enums/OrderState';
 
 export interface Order {
   id: string; // UUID
@@ -10,7 +11,7 @@ export interface Order {
   buyer_email: string;
   buyer_phone: string; // E.164 format
   buyer_name: string;
-  state: 'pending' | 'confirmed' | 'canceled' | 'refunded';
+  state: OrderState;
   subtotal_xof: string; // Decimal as string
   fees_xof: string; // Decimal as string
   total_xof: string; // Decimal as string
