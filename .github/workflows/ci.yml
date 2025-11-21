@@ -14,13 +14,23 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo, pdo_pgsql
+          extensions: pdo, pdo_pgsql, pdo_sqlite
           coverage: none
       - name: Install Composer dependencies
         working-directory: apps/api
         run: |
           curl -sS https://getcomposer.org/installer | php
           php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Setup Laravel test environment
+        working-directory: apps/api
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env 2>/dev/null || echo "APP_NAME=Aria" > .env
+            php artisan key:generate --ansi
+          fi
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --database=sqlite --force
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Restore Turborepo cache
