@@ -15,6 +15,9 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@aria/types": "*",
+    "@aria/utils": "*",
+    "@aria/api-client": "*",
     "expo": "~52.0.0",
     "expo-router": "^4.0.0",
     "expo-status-bar": "^3.0.8",

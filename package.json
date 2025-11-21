@@ -12,6 +12,7 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
+    "generate:types": "./scripts/generate-types.sh",
     "dev:web": "turbo run dev --filter=@aria/web",
     "dev:mobile": "turbo run dev --filter=@aria/mobile",
     "dev:api": "turbo run dev --filter=@aria/api",
