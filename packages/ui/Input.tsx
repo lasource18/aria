@@ -5,15 +5,20 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
     error?: string;
 }
 
-export function Input({ label, error, className = '', ...props }: InputProps) {
+export function Input({ label, error, className = '', id, ...props }: InputProps) {
+    // Generate a unique id if not provided
+    const inputId = id || `input-${React.useId()}`;
+
     return (
         <div>
             {label && (
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">
                     {label}
+                    {props.required && <span className="text-red-500 ml-1">*</span>}
                 </label>
             )}
             <input
+                id={inputId}
                 className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm ${
                     error ? 'border-red-500' : ''
                 } ${className}`}

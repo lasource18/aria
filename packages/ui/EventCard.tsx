@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatEventDate } from '@aria/utils';
 
 export interface Event {
     id: string;
@@ -14,15 +15,6 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, onView }: EventCardProps) {
-    const formatEventDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">

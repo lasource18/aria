@@ -14,8 +14,8 @@ Route::get('/test-inertia', function () {
     ]);
 });
 
-// Dashboard routes (will add auth middleware later when auth is set up)
-Route::prefix('org/{org}')->group(function () {
+// Dashboard routes - require authentication and org membership
+Route::middleware(['auth:sanctum', 'org.member'])->prefix('org/{org}')->group(function () {
     Route::get('/dashboard', function ($orgId) {
         return Inertia::render('Dashboard/Index', [
             'org' => ['id' => $orgId, 'name' => 'Sample Organization'],

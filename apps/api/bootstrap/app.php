@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+        $middleware->alias([
+            'org.member' => \App\Http\Middleware\EnsureUserIsOrgMember::class,
+        ]);
         // Don't redirect API routes to login - let exception handler return JSON
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->expectsJson() || $request->is('api/*')) {
