@@ -13,17 +13,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            if (DB::getDriverName() === 'pgsql') {
+                $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            } else {
+                $table->uuid('id')->primary();
+            }
             $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignUuid('org_id')->nullable()->constrained('orgs')->cascadeOnDelete();
             $table->string('action'); // e.g., 'org.created', 'user.logged_in'
             $table->string('entity_type'); // e.g., 'Org', 'User', 'OrgMember'
             $table->uuid('entity_id'); // polymorphic reference
-            $table->jsonb('changes')->nullable(); // before/after state
-            $table->jsonb('metadata')->nullable(); // additional context
+            // Use json for compatibility (jsonb is PostgreSQL-specific)
+            $table->json('changes')->nullable(); // before/after state
+            $table->json('metadata')->nullable(); // additional context
             $table->string('ip_address'); // IPv4 or IPv6
             $table->text('user_agent')->nullable();
-            $table->timestampTz('created_at'); // immutable - no updated_at
+            // Use timestamp for compatibility (timestampTz is PostgreSQL-specific)
+            $table->timestamp('created_at'); // immutable - no updated_at
 
             // Indexes for efficient querying
             $table->index(['user_id', 'created_at']);

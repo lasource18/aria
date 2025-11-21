@@ -13,7 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orgs', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            if (DB::getDriverName() === 'pgsql') {
+                $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            } else {
+                $table->uuid('id')->primary();
+            }
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('country_code')->default('CI');

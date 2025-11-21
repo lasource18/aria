@@ -12,11 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Enable UUID extension for PostgreSQL
-        DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        // Enable UUID extension for PostgreSQL only
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        }
 
         Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            // Use database-specific UUID defaults
+            if (DB::getDriverName() === 'pgsql') {
+                $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            } else {
+                // SQLite and other databases: use string UUIDs without default
+                $table->uuid('id')->primary();
+            }
             $table->string('email')->unique();
             $table->string('phone')->nullable(); // E.164 format
             $table->string('password');
@@ -41,7 +49,7 @@ return new class extends Migration
 
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
+            $table->foreignUuid('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->longText('payload');
