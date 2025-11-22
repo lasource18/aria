@@ -1,0 +1,76 @@
+$ php artisan test
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+   PASS  Tests\Feature\AuditLogTest
+  ✓ user registration creates audit log                                  0.33s  
+  ✓ user login creates audit log                                         0.02s  
+  ✓ failed login creates audit log                                       0.01s  
+  ✓ user logout creates audit log                                        0.01s  
+  ✓ org creation creates audit log                                       0.01s  
+  ✓ org update creates audit log                                         0.01s  
+  ✓ member addition creates audit log                                    0.03s  
+  ✓ member role update creates audit log                                 0.01s  
+  ✓ member removal creates audit log                                     0.01s  
+  ✓ password reset request creates audit log                             0.01s  
+  ✓ audit log captures ip and user agent                                 0.01s  
+
+   PASS  Tests\Feature\AuthTest
+  ✓ user can register                                                    0.02s  
+  ✓ user can login with email                                            0.01s  
+  ✓ user cannot login with invalid credentials                           0.01s  
+  ✓ user can logout                                                      0.02s  
+
+   PASS  Tests\Feature\DashboardTest
+  ✓ dashboard requires authentication                                    0.01s  
+  ✓ dashboard requires org membership                                    0.02s  
+  ✓ org member can access dashboard                                      0.01s  
+  ✓ events list requires authentication                                  0.01s  
+  ✓ events list requires org membership                                  0.01s  
+  ✓ org member can access events list                                    0.01s  
+  ✓ events create requires authentication                                0.01s  
+  ✓ events create requires org membership                                0.01s  
+  ✓ org member can access events create                                  0.01s  
+  ✓ events edit requires authentication                                  0.01s  
+  ✓ events edit requires org membership                                  0.01s  
+  ✓ org member can access events edit                                    0.01s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ the application returns a successful response                        0.01s  
+
+   PASS  Tests\Feature\OrgTest
+  ✓ creating org assigns creator as owner                                0.01s  
+  ✓ listing orgs returns only user orgs                                  0.01s  
+  ✓ viewing org requires membership                                      0.01s  
+  ✓ updating org requires owner or admin                                 0.01s  
+  ✓ admin can update org                                                 0.01s  
+  ✓ adding member requires owner or admin                                0.01s  
+  ✓ owner can add members                                                0.01s  
+  ✓ cannot add duplicate member                                          0.01s  
+  ✓ updating member role requires owner or admin                         0.01s  
+  ✓ owner can update member roles                                        0.01s  
+  ✓ removing member requires owner or admin                              0.01s  
+  ✓ owner can remove members                                             0.01s  
+  ✓ cannot remove last owner                                             0.01s  
+  ✓ slug auto generated from name                                        0.01s  
+  ✓ slug uniqueness enforced                                             0.01s  
+  ✓ unauthenticated cannot access orgs
+  ✓ unauthenticated cannot create org
+
+   PASS  Tests\Feature\PasswordResetTest
+  ✓ user can request password reset with email                           0.01s  
+  ✓ user can request password reset with phone                           0.01s  
+  ✓ password reset request with nonexistent email returns 200
+  ✓ user can reset password with valid token                             0.02s  
+  ✓ password reset fails with expired token                              0.01s  
+  ✓ password reset fails with invalid token                              0.01s  
+  ✓ password reset validates password requirements                       0.01s  
+  ✓ password reset requires password confirmation                        0.01s  
+  ✓ password reset revokes all user tokens                               0.01s  
+  ✓ new password reset request invalidates previous tokens               0.01s  
+  ✓ debug token returned in testing environment                          0.01s  
+
+  Tests:    57 passed (131 assertions)
+  Duration: 0.91s
+

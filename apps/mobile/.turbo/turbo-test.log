@@ -1,0 +1,11 @@
+$ bun test
+bun test v1.1.27 (267afa29)
+
+App.test.tsx:
+(pass) App > should be a placeholder test [0.53ms]
+(pass) App > should verify basic math [0.01ms]
+
+ 2 pass
+ 0 fail
+ 2 expect() calls
+Ran 2 tests across 1 files. [125.00ms]

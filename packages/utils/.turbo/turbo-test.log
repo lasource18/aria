@@ -1,0 +1,43 @@
+$ bun test
+bun test v1.1.27 (267afa29)
+
+__tests__/currency.test.ts:
+(pass) formatXOF > formats with space separator [2.57ms]
+(pass) formatXOF > handles zero amount [0.02ms]
+(pass) formatXOF > handles single digit [0.01ms]
+(pass) formatXOF > handles two digits
+(pass) formatXOF > handles three digits (no separator)
+(pass) formatXOF > handles four digits
+(pass) formatXOF > handles large amounts [0.02ms]
+(pass) formatXOF > rounds decimal amounts [0.01ms]
+(pass) formatXOF > handles negative amounts [0.01ms]
+(pass) parseXOF > removes formatting [0.19ms]
+(pass) parseXOF > handles zero
+(pass) parseXOF > handles amounts without spaces
+(pass) parseXOF > handles plain numbers
+(pass) parseXOF > handles empty or invalid input
+
+__tests__/dates.test.ts:
+(pass) formatEventDate > formats date with time in Africa/Abidjan timezone [3.42ms]
+(pass) formatEventDate > accepts Date objects [0.06ms]
+(pass) formatEventDate > uses default Africa/Abidjan timezone [0.06ms]
+(pass) formatShortDate > formats date without time [0.06ms]
+
+__tests__/validation.test.ts:
+(pass) isValidE164Phone > validates Côte d'Ivoire numbers [0.15ms]
+(pass) isValidE164Phone > validates French numbers [0.18ms]
+(pass) isValidE164Phone > validates US numbers
+(pass) isValidE164Phone > rejects numbers without country code
+(pass) isValidE164Phone > rejects numbers without plus sign
+(pass) isValidE164Phone > rejects numbers that are too short
+(pass) isValidE164Phone > rejects numbers that are too long
+(pass) isValidE164Phone > rejects invalid formats
+(pass) isValidEmail > validates correct email formats [0.03ms]
+(pass) isValidEmail > rejects invalid email formats
+(pass) isValidSlug > validates correct slug formats [0.02ms]
+(pass) isValidSlug > rejects invalid slug formats
+
+ 30 pass
+ 0 fail
+ 57 expect() calls
+Ran 30 tests across 3 files. [188.00ms]
