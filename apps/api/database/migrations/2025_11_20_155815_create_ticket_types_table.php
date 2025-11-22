@@ -31,14 +31,18 @@ return new class extends Migration
             $table->index('event_id', 'idx_ticket_types_event_id');
         });
 
-        // Add constraint: price_xof must be >= 0
-        DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_price CHECK (price_xof >= 0)');
+        // Add constraints (PostgreSQL only)
+        // SQLite requires CHECK constraints to be defined inline during CREATE TABLE
+        if (DB::getDriverName() === 'pgsql') {
+            // Add constraint: price_xof must be >= 0
+            DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_price CHECK (price_xof >= 0)');
 
-        // Add constraint: max_qty must be > 0 if set
-        DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_max_qty CHECK (max_qty IS NULL OR max_qty > 0)');
+            // Add constraint: max_qty must be > 0 if set
+            DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_max_qty CHECK (max_qty IS NULL OR max_qty > 0)');
 
-        // Add constraint: per_order_limit must be > 0
-        DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_per_order_limit CHECK (per_order_limit > 0)');
+            // Add constraint: per_order_limit must be > 0
+            DB::statement('ALTER TABLE ticket_types ADD CONSTRAINT check_ticket_per_order_limit CHECK (per_order_limit > 0)');
+        }
     }
 
     /**

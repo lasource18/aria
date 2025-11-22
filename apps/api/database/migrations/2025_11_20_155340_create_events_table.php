@@ -69,11 +69,18 @@ return new class extends Migration
             // pg_trgm not available, skip index
         }
 
-        // Add partial index for published events (most common query)
-        DB::statement("CREATE INDEX idx_events_status_published ON events(status) WHERE status = 'published'");
+        // Add partial index for published events (most common query) - supported by both PostgreSQL and SQLite
+        try {
+            DB::statement("CREATE INDEX idx_events_status_published ON events(status) WHERE status = 'published'");
+        } catch (\Exception $e) {
+            // Partial indexes not supported, skip
+        }
 
-        // Add constraint: start_at must be before end_at
-        DB::statement('ALTER TABLE events ADD CONSTRAINT check_event_dates CHECK (start_at < end_at)');
+        // Add constraint: start_at must be before end_at (PostgreSQL only)
+        // SQLite requires CHECK constraints to be defined inline during CREATE TABLE
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE events ADD CONSTRAINT check_event_dates CHECK (start_at < end_at)');
+        }
     }
 
     /**
