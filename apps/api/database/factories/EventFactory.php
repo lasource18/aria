@@ -11,6 +11,20 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class EventFactory extends Factory
 {
     /**
+     * Generate a valid date range that satisfies the check_event_dates constraint.
+     * Ensures end_at is always after start_at.
+     *
+     * @return array{start_at: \DateTime, end_at: \DateTime}
+     */
+    private function generateValidDateRange(): array
+    {
+        $startAt = fake()->dateTimeBetween('+1 week', '+3 months');
+        $endAt = (clone $startAt)->modify('+'.fake()->numberBetween(1, 8).' hours');
+
+        return ['start_at' => $startAt, 'end_at' => $endAt];
+    }
+
+    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
@@ -41,8 +55,7 @@ class EventFactory extends Factory
         ];
 
         $categories = ['music', 'arts', 'sports', 'tech', 'other'];
-        $startAt = fake()->dateTimeBetween('+1 week', '+3 months');
-        $endAt = fake()->dateTimeBetween($startAt, $startAt->format('Y-m-d H:i:s').' +8 hours');
+        ['start_at' => $startAt, 'end_at' => $endAt] = $this->generateValidDateRange();
         $venue = fake()->randomElement($venues);
         $isOnline = fake()->boolean(20); // 20% chance online
 
@@ -89,11 +102,16 @@ class EventFactory extends Factory
      */
     public function ended(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'ended',
-            'start_at' => fake()->dateTimeBetween('-2 months', '-1 week'),
-            'end_at' => fake()->dateTimeBetween('-1 week', '-1 day'),
-        ]);
+        return $this->state(function (array $attributes) {
+            $startAt = fake()->dateTimeBetween('-2 months', '-1 week');
+            $endAt = (clone $startAt)->modify('+'.fake()->numberBetween(1, 8).' hours');
+
+            return [
+                'status' => 'ended',
+                'start_at' => $startAt,
+                'end_at' => $endAt,
+            ];
+        });
     }
 
     /**

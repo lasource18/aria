@@ -1,0 +1,1 @@
+{"root":["../src/index.ts","../src/api/event.ts","../src/api/order.ts","../src/api/org.ts","../src/api/payment.ts","../src/api/ticket.ts","../src/api/tickettype.ts","../src/api/user.ts","../src/enums/eventstatus.ts","../src/enums/orderstate.ts","../src/enums/orgrole.ts","../src/enums/paymentstatus.ts","../src/enums/tickettypeenum.ts"],"version":"5.9.3"}

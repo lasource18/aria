@@ -96,18 +96,22 @@ class EventDiscoveryTest extends TestCase
         // Create events at different dates
         Event::factory()->published()->create([
             'start_at' => now()->addDays(5),
+            'end_at' => now()->addDays(5)->addHours(3),
         ]);
 
         Event::factory()->published()->create([
             'start_at' => now()->addDays(15),
+            'end_at' => now()->addDays(15)->addHours(3),
         ]);
 
         Event::factory()->published()->create([
             'start_at' => now()->addDays(25),
+            'end_at' => now()->addDays(25)->addHours(3),
         ]);
 
         Event::factory()->published()->create([
             'start_at' => now()->addDays(35),
+            'end_at' => now()->addDays(35)->addHours(3),
         ]);
 
         $from = now()->addDays(10)->toISOString();
